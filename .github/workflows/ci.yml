@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [main, dev]
     types: [opened, synchronize, reopened, labeled, unlabeled]
-  push:
-    branches: [ci]
 
 permissions:
   contents: read
