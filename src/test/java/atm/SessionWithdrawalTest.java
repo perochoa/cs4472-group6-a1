@@ -3,6 +3,7 @@ package atm;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,6 +45,7 @@ public class SessionWithdrawalTest {
 
 	
 	@ParameterizedTest(name = "{0}: pin={1}, amount={2} -> {3}")
+	@DisplayName("Session withdrawal, PIN format and amount")
 	@CsvSource({
 		"TC01, 0000, 0, PIN_ERROR",
 		"TC02, 0000, 20, PIN_ERROR",
@@ -99,9 +101,13 @@ public class SessionWithdrawalTest {
 		// lenient: tests that stop at the PIN or amount check never use these stubs
 		Mockito.lenient().when(dispatcher.checkCredentials(ArgumentMatchers.any(), ArgumentMatchers.any()))
 				.thenReturn(true);
+		// models the README account: $5,000 balance, $1,000 daily limit
+		TransactionResult bankResult = amount <= 1000
+				? new TransactionResult(true, "", 0.0, new double[] {5000 - amount})
+				: new TransactionResult(false, "Daily limit exceeded.", 0.0, new double[] {5000});
 		Mockito.lenient().when(dispatcher.performTransaction(ArgumentMatchers.any(), ArgumentMatchers.any(),
 				ArgumentMatchers.any()))
-				.thenReturn(new TransactionResult(true, "", 0.0, new double[] {5000 - amount}));
+				.thenReturn(bankResult);
 		atm.checkCardNumber("4111111111111111");
 
 		if (expected.equals("PIN_ERROR")) {
