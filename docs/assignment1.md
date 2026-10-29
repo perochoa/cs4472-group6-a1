@@ -7,7 +7,7 @@
 
 ### Section 1: Process and assumptions
 
-**Process.** I split each input into equivalence classes using only the Deposit specification. The amount and balance boundaries depend on whether the client is a student, so I defined the classes separately for students and non-students. For the valid part, I picked one representative value from the middle of each class (not on a boundary, since boundaries are covered by BVA, not ECA). I made sure every valid class appears in at least one test and that each of the spec's outcomes (0.5%, 0.25%, 0.8%, 0.4%, 0.1%, no fee) is checked. For the robust part, I added one test per invalid class, where exactly one input is invalid and the others are valid (single fault assumption).
+**Process.** I split each input into equivalence classes using only the Deposit specification. The amount and balance boundaries depend on whether the client is a student, so I defined the classes separately for students and non-students. For the valid part, I picked one representative value from the middle of each class (not on a boundary, since boundaries are covered by BVA, not ECA). I made sure every valid class appears in at least one test and that each of the spec's outcomes (0.5%, 0.25%, 0.8%, 0.4%, 0.1%, no fee) is checked. For the robust part, I tested each invalid class (A5, A6, B7) once for a student and once for a non-student, since the valid classes for the other inputs differ between the two. In each of these tests exactly one input is invalid and the others are valid (single fault assumption).
 
 **Equivalence classes.**
 
