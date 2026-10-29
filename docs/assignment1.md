@@ -187,7 +187,154 @@ Expected fee in dollars. Student cases use a balance of $3,000; non-student case
 
 ### Test results
 
-From the CI run on the PR.
+From the CI run on PR #10 (136 run, 111 failed, 25 passed).
 
 | ID | Result |
 |---|---|
+| W1 | Fail |
+| W2 | Fail |
+| W3 | Fail |
+| W4 | Fail |
+| W5 | Fail |
+| W6 | Fail |
+| W7 | Fail |
+| W8 | Fail |
+| W9 | Fail |
+| W10 | Fail |
+| W11 | Fail |
+| W12 | Fail |
+| W13 | Fail |
+| W14 | Fail |
+| W15 | Fail |
+| W16 | Fail |
+| W17 | Fail |
+| W18 | Fail |
+| W19 | Fail |
+| W20 | Fail |
+| W21 | Fail |
+| W22 | Fail |
+| W23 | Fail |
+| W24 | Fail |
+| W25 | Fail |
+| W26 | Fail |
+| W27 | Fail |
+| W28 | Fail |
+| W29 | Fail |
+| W30 | Fail |
+| W31 | Fail |
+| W32 | Fail |
+| W33 | Fail |
+| W34 | Fail |
+| W35 | Fail |
+| W36 | Fail |
+| W37 | Fail |
+| W38 | Fail |
+| W39 | Fail |
+| W40 | Fail |
+| W41 | Fail |
+| W42 | Fail |
+| W43 | Fail |
+| W44 | Fail |
+| W45 | Fail |
+| W46 | Fail |
+| W47 | Fail |
+| W48 | Fail |
+| W49 | Fail |
+| W50 | Fail |
+| W51 | Fail |
+| W52 | Fail |
+| W53 | Fail |
+| W54 | Fail |
+| W55 | Fail |
+| W56 | Fail |
+| W57 | Fail |
+| W58 | Fail |
+| W59 | Fail |
+| W60 | Fail |
+| W61 | Fail |
+| W62 | Fail |
+| W63 | Fail |
+| W64 | Fail |
+| W65 | Fail |
+| W66 | Fail |
+| W67 | Pass |
+| W68 | Pass |
+| W69 | Pass |
+| W70 | Pass |
+| W71 | Fail |
+| W72 | Fail |
+| W73 | Pass |
+| W74 | Fail |
+| W75 | Fail |
+| W76 | Fail |
+| W77 | Fail |
+| W78 | Fail |
+| W79 | Pass |
+| W80 | Pass |
+| W81 | Pass |
+| W82 | Pass |
+| W83 | Fail |
+| W84 | Fail |
+| W85 | Pass |
+| W86 | Fail |
+| W87 | Fail |
+| W88 | Fail |
+| W89 | Fail |
+| W90 | Fail |
+| W91 | Pass |
+| W92 | Pass |
+| W93 | Pass |
+| W94 | Pass |
+| W95 | Fail |
+| W96 | Fail |
+| W97 | Pass |
+| W98 | Fail |
+| W99 | Fail |
+| W100 | Fail |
+| W101 | Fail |
+| W102 | Fail |
+| W103 | Pass |
+| W104 | Pass |
+| W105 | Pass |
+| W106 | Pass |
+| W107 | Fail |
+| W108 | Fail |
+| W109 | Pass |
+| W110 | Fail |
+| W111 | Fail |
+| W112 | Fail |
+| W113 | Fail |
+| W114 | Fail |
+| W115 | Pass |
+| W116 | Pass |
+| W117 | Pass |
+| W118 | Pass |
+| W119 | Fail |
+| W120 | Fail |
+| W121 | Pass |
+| W122 | Fail |
+| W123 | Fail |
+| W124 | Fail |
+| W125 | Fail |
+| W126 | Fail |
+| W127 | Fail |
+| W128 | Fail |
+| W129 | Fail |
+| W130 | Fail |
+| W131 | Fail |
+| W132 | Fail |
+| W133 | Fail |
+| W134 | Fail |
+| W135 | Fail |
+| W136 | Fail |
+
+### Failure log
+
+Times are rough, in minutes.
+
+| Failure ID | Exposing tests | Time testing before found | Time diagnosing |
+|---|---|---|---|
+| WF1 | W9–W13, W16–W20, W23–W27, W30–W34, W37–W41 (student, valid) | | |
+| WF2 | W63–W66, W75–W78, W87–W90, W99–W102, W111–W114 (non-student, balance < $1,000) | | |
+| WF3 | W71, W72, W83, W84, W95, W96, W107, W108, W119, W120 (non-student, balance $5,000–$5,000.01) | | |
+| WF4 | all 56 invalid-input cases (W1–W8, W14, W15, W21, W22, W28, W29, W35, W36, W42–W62, W74, W86, W98, W110, W122–W136) | | |
