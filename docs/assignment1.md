@@ -87,9 +87,9 @@ Times are rough, in minutes. All failures appeared in the same first run of the 
 
 | Failure ID | Exposing tests | Time testing before found | Time diagnosing |
 |---|---|---|---|
-| DF1 | D1, D2 (student, amount > $50 treated as ≤ $50: threshold is $100 in code) | ?? | ?? |
-| DF2 | D4, D5 (student, amount ≤ $50, balance ≤ $5,000 charged 0.2% instead of no fee) | ?? | ?? |
-| DF3 | D6, D7 (non-student, amount > $250 treated as ≤ $250: threshold is $500 in code) | ?? | ?? |
-| DF4 | D8 (non-student, amount ≤ $250, balance > $10,000 charged 0.5% instead of no fee) | ?? | ?? |
-| DF5 | D9, D10 (non-student, amount ≤ $250, balance ≤ $10,000 charged nothing instead of 0.1%) | ?? | ?? |
-| DF6 | D11–D16 (invalid amount or balance accepted, no `IllegalArgumentException`) | ?? | ?? |
+| DF1 | D1, D2 (student, amount > $50 treated as ≤ $50: threshold is $100 in code) | 70 | 15 |
+| DF2 | D4, D5 (student, amount ≤ $50, balance ≤ $5,000 charged 0.2% instead of no fee) | 70 | 10 |
+| DF3 | D6, D7 (non-student, amount > $250 treated as ≤ $250: threshold is $500 in code) | 70 | 10 |
+| DF4 | D8 (non-student, amount ≤ $250, balance > $10,000 charged 0.5% instead of no fee) | 70 | 5 |
+| DF5 | D9, D10 (non-student, amount ≤ $250, balance ≤ $10,000 charged nothing instead of 0.1%) | 70 | 5 |
+| DF6 | D11–D16 (invalid amount or balance accepted, no `IllegalArgumentException`) | 70 | 5 |
