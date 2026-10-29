@@ -123,12 +123,3 @@ public class SessionWithdrawalTest {
 	}
 
 }
-
-// Withdrawal
-// If the client is a student and
-	// If the transaction is performed during the weekday, then there is no fee.
-	// Otherwise, the fee is 0.1% of the amount withdrawn.
-// If the client is not a student and
-	// If the balance of the account is less than $1,000, then the fee is 0.3% of the amount withdrawn.
-	// If, however, the balance is $1,000 or more, but less than $5,000, the fee is 0.1% of the amount withdrawn.
-	// If the balance is $5,000 or more, then there is no fee.
