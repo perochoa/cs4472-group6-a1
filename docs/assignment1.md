@@ -334,7 +334,7 @@ Times are rough, in minutes.
 
 | Failure ID | Exposing tests | Time testing before found | Time diagnosing |
 |---|---|---|---|
-| WF1 | W9–W13, W16–W20, W23–W27, W30–W34, W37–W41 (student, valid) | | |
-| WF2 | W63–W66, W75–W78, W87–W90, W99–W102, W111–W114 (non-student, balance < $1,000) | | |
-| WF3 | W71, W72, W83, W84, W95, W96, W107, W108, W119, W120 (non-student, balance $5,000–$5,000.01) | | |
-| WF4 | all 56 invalid-input cases (W1–W8, W14, W15, W21, W22, W28, W29, W35, W36, W42–W62, W74, W86, W98, W110, W122–W136) | | |
+| WF1 | W9–W13, W16–W20, W23–W27, W30–W34, W37–W41 (student, valid) | 160 | 35 |
+| WF2 | W63–W66, W75–W78, W87–W90, W99–W102, W111–W114 (non-student, balance < $1,000) | 20 | 25 |
+| WF3 | W71, W72, W83, W84, W95, W96, W107, W108, W119, W120 (non-student, balance $5,000–$5,000.01) | 15 | 45 |
+| WF4 | all 56 invalid-input cases (W1–W8, W14, W15, W21, W22, W28, W29, W35, W36, W42–W62, W74, W86, W98, W110, W122–W136) | 10 | 20 |
