@@ -1,0 +1,28 @@
+# Maven
+target/
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+
+# Demo database (recreate with: sqlite3 bank.db < bank-seed.sql)
+*.db
+*.db-journal
+
+# Java
+*.class
+*.log
+hs_err_pid*
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
