@@ -44,6 +44,11 @@ class FeesCalculatorTransferTest {
         double toAccountBalance, 
         double expectedFee) {
 
-        assertEquals(expectedFee, calculator.calculateTransferFee(amount, fromAccountBalance, toAccountBalance, student), TOLERANCE, name + "failed.");
+        // Convert percentage to decimal
+        expectedFee = (expectedFee/100); 
+        assertEquals(amount*expectedFee, 
+            calculator.calculateTransferFee(amount, fromAccountBalance, toAccountBalance, student), 
+            TOLERANCE, 
+            name + " failed.");
     }
 }
