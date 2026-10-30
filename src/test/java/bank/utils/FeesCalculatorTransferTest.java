@@ -36,7 +36,7 @@ class FeesCalculatorTransferTest {
             "DT15,false,101,2001,999,0.5",
             "DT16,false,101,2001,1001,0.25"
     })
-    private void transferTest(
+    void transferTest(
         String name, 
         boolean student, 
         double amount, 
