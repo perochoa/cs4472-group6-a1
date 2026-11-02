@@ -145,7 +145,7 @@ Times are rough, in minutes. All failures were found in the same test run, so "t
 | Failure ID | Exposing tests | Time testing before found | Time diagnosing |
 |---|---|---|---|
 | F1 | TC08–TC42 (valid 5-digit PIN rejected with `InvalidPinFormatException`) | 90 | 15 |
-| F2 | TC01–TC04, TC06, TC07 (invalid 4-digit PIN 0000 accepted) | 90 | 5 |
+| F2 | TC01–TC07 (invalid 4-digit PIN 0000 accepted; in TC05 this lets the test reach the amount check, where F3 shows up) | 90 | 5 |
 | F3 | TC05 (valid amount $980 rejected with `InvalidAmountException`) | 90 | 15 |
 
 Faults found by reading the code but hidden by F1 (no test fails on them yet):
