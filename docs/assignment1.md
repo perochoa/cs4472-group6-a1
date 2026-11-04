@@ -54,3 +54,52 @@
 |DT14|false|101|1999|1001|0.1|non-student, amount >= 100, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.1%|
 |DT15|false|101|2001|999|0.5|non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.5%|
 |DT16|false|101|2001|1001|0.25|non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.25%|
+
+### Test results
+
+From the CI run on PR #11 (16 ran, 16 failed, 0 passed)
+
+|ID|Result|
+|--|--|
+|DT1|Fail|
+|DT2|Fail|
+|DT3|Fail|
+|DT4|Fail|
+|DT5|Fail|
+|DT6|Fail|
+|DT7|Fail|
+|DT8|Fail|
+|DT9|Fail|
+|DT10|Fail|
+|DT11|Fail|
+|DT12|Fail|
+|DT13|Fail|
+|DT14|Fail|
+|DT15|Fail|
+|DT16|Fail|
+
+### Failure Log
+
+Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, making the DTA table, writing the 16 tests).
+
+|Failure ID|Exposing tests|Time testing before found|Time diagnosing|
+|-|-|-|-|
+|F1| DT1-DT8 (student : amount and fromAccountBalance thresholds are $100 and $1000 respectively instead of $200 and $2000) |60|5|
+|F2| DT1 (student, amount<$200, fromAccountBalance<$2000, toAccountBalance<$1000 : fee is calculated 2.5% instead of 0.1%.) |60|5|
+|F3| DT2 (student, amount<$200, fromAccountBalance<$2000, toAccountBalance>=$1000 : fee is calculated 1.25% instead of 0.05%.) |60|5|
+|F4| DT3 (student, amount<$200, fromAccountBalance<$2000, toAccountBalance>=$1000 : fee is calculated 2.5% instead of 0.025%) |60|10|
+|F5| DT4 (student, amount<$200, fromAccountBalance>=$2000, toAccountBalance>=$1000 : fee is calculated 1.25% instead of 0.025%.) |60|5|
+|F6| DT5 (student, amount>=$200, fromAccountBalance<$2000, toAccountBalance<$1000 : fee is calculated 2.5% instead of 0.05%) |60|5| 
+|F7| DT6 (student, amount>=$200, fromAccountBalance<$2000, toAccountBalance>=$1000 : fee is calculated 1.25% instead of 0.025%.) |60|5|
+|F8| DT7 (student, amount>=$200, fromAccountBalance>=$2000, toAccountBalance<$1000 : fee is calculated 2.5% instead of 0.25%) |60|5|
+|F9| DT8 (student, amount>=$200, fromAccountBalance>=$2000, toAccountBalance>=$1000 : fee is calculated 1.25% instead of 0.125%) |60|5|
+|F10| DT9-DT12 (non-student, amount<$100 : fromAccountBalance threshold is $1000  and toAccountBalance threshold is $1000 rather than $4000 and $2000 respectively) |60|5|
+|F11| DT9 (non-student, amount<$100, fromAccountBalance<$4000, toAccountBalance<$2000 : fee is calculated 5% instead of 0.2%) |60|5|
+|F12| DT10 (non-student, amount<$100, fromAccountBalance<$4000, toAccountBalance>=$2000 : fee is calculated 5% instead of 0.1%) |60|5|
+|F13| DT11 (non-student, amount<$100, fromAccountBalance>=$4000, toAccountBalance<$2000 : fee is calculated 5% instead of 1.0%) |60|5|
+|F14| DT12 (non-student, amount<$100, fromAccountBalance>=$4000, toAccountBalance>=$2000 : fee is calculated 5% instead of 0.5%) |60|5|
+|F15| DT13-DT16 (non-student, amount>=$100, fromAcountBalance<$2000 treated as >=$2000, threshold is $1000 in code) |60|5|
+|F16| DT13 (non-student, amount>=$100, fromAccountBalance<$2000, toAccountBalance<$1000 : fee is calculated 1% instead of 0.2%) |60|5|
+|F17| DT14 (non-student, amount>=$100, fromAccountBalance<$2000, toAccountBalance>=$1000 : fee is calculated 5.5% instead of 0.1%) |60|5|
+|F18| DT15 (non-student, amount>=$100, fromAccountBalance>=$2000, toAccountBalance<$1000 : fee is calculated 5% instead of 0.5%) |60|5|
+|F19| DT16 (non-student, amount>=$100, fromAccountBalance>=$2000, toAccountBalance>=$1000 : fee is calculated 5.5% instead of 0.25%) |60|5|
