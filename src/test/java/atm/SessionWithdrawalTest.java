@@ -38,67 +38,43 @@ public class SessionWithdrawalTest {
 		atm.setMainPanel(mainPanel);
 		atm.createSession();
 	}
+	
+	// PIN and amount are tested separately (instructor clarification): with one variable,
+	// robust worst case BVA gives the same 7 values as single fault BVA (7^1 = 6*1 + 1)
 
-	@AfterEach
-	public void tearDown() throws Exception {
+	// PIN at its 7 robust boundary values, amount held at its nominal value ($500)
+	@ParameterizedTest(name = "{0}: pin={1}, amount=500 -> {2} ({3})")
+	@DisplayName("Session withdrawal, PIN format")
+	@CsvSource({
+		"TC01, 0000, PIN_ERROR, 'PIN must be 5 digits'",
+		"TC02, 00000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC03, 00001, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC04, 55555, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC05, 99998, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC06, 99999, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC07, 100000, PIN_ERROR, 'PIN must be 5 digits'",
+	})
+	public void sessionPinFormatTest(String id, String pin, String expected, String rule) throws Exception {
+		runWithdrawal(pin, 500, expected);
 	}
 
-	
-	@ParameterizedTest(name = "{0}: pin={1}, amount={2} -> {3} ({4})")
-	@DisplayName("Session withdrawal, PIN format and amount")
+	// amount at its 7 robust boundary values, PIN held at its nominal value (55555)
+	@ParameterizedTest(name = "{0}: pin=55555, amount={1} -> {2} ({3})")
+	@DisplayName("Session withdrawal, amount")
 	@CsvSource({
-		"TC01, 0000, 0, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC02, 0000, 20, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC03, 0000, 40, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC04, 0000, 500, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC05, 0000, 980, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC06, 0000, 1000, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC07, 0000, 1020, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC08, 00000, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC09, 00000, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC10, 00000, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC11, 00000, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC12, 00000, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC13, 00000, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC14, 00000, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
-		"TC15, 00001, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC16, 00001, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC17, 00001, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC18, 00001, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC19, 00001, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC20, 00001, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC21, 00001, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
-		"TC22, 55555, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC23, 55555, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC24, 55555, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC25, 55555, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC26, 55555, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC27, 55555, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC28, 55555, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
-		"TC29, 99998, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC30, 99998, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC31, 99998, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC32, 99998, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC33, 99998, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC34, 99998, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC35, 99998, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
-		"TC36, 99999, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC37, 99999, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC38, 99999, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC39, 99999, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC40, 99999, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC41, 99999, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC42, 99999, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
-		"TC43, 100000, 0, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC44, 100000, 20, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC45, 100000, 40, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC46, 100000, 500, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC47, 100000, 980, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC48, 100000, 1000, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC49, 100000, 1020, PIN_ERROR, 'PIN must be 5 digits'",
+		"TC08, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
+		"TC09, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC10, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC11, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC12, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC13, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC14, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'",
 	})
-	public void sessionWithdrawalTest(String id, String pin, int amount, String expected,
-			String rule) throws Exception {
+	public void sessionAmountTest(String id, int amount, String expected, String rule) throws Exception {
+		runWithdrawal("55555", amount, expected);
+	}
+
+	private void runWithdrawal(String pin, int amount, String expected) throws Exception {
 		// lenient: tests that stop at the PIN or amount check never use these stubs
 		Mockito.lenient().when(dispatcher.checkCredentials(ArgumentMatchers.any(), ArgumentMatchers.any()))
 				.thenReturn(true);

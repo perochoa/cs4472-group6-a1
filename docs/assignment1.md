@@ -10,7 +10,7 @@
 **Process.** 
 I used 7 values for the robust boundary value analysis of min-, min, min+, nominal value, max-, max, and max+ for both the PIN number and the amount. The range of valid PIN numbers can be defined as from 00000 to 99999, so we can define the values around max and min at those values, and choose the nominal value at the halfway point. The same is done for amount at the range of 20 (the minimum for a $20 or $50 withdrawal) to $1000 (daily limit).
 
-I created 7x7 test cases to match the definition of worst case testing.
+As the instructor clarified, the PIN and the withdrawal amount are separate test targets, so I tested them separately instead of combining them. The PIN tests use the 7 PIN values with the amount held at its nominal value ($500), and the amount tests use the 7 amount values with the PIN held at its nominal value (55555). With one variable, robust worst case BVA gives the same 7 values as robust BVA under the single fault assumption (7^1 = 6 × 1 + 1), so these tests are both worst case and single fault. This gives 7 + 7 = 14 test cases.
 
 Additionally, I mocked the bank class so that errors in the bank code don't affect what we're testing, the ATM Session code. We also avoid having to set up the bank database.
 
@@ -25,66 +25,39 @@ Additionally, I mocked the bank class so that errors in the bank code don't affe
 
 1. We perform tests on PIN checking through the ATM class because the Session class doesn't actually validate the PIN, the ATM class does
 2. A $0 withdrawal should throw `InvalidAmountException` because it is an invalid amount
+3. PIN and amount are tested separately (instructor clarification), each with the other variable held at its nominal value
 
 ### Section 2: Test cases
 
 Account: daily limit $1,000, available balance $5,000.
 
+**PIN format** (`sessionPinFormatTest`, amount held at $500)
+
 | ID | PIN | Amount | Expected | Spec rule |
 |---|---|---|---|---|
-| TC01 | 0000 | 0 | InvalidPinFormatException | PIN must be 5 digits |
-| TC02 | 0000 | 20 | InvalidPinFormatException | PIN must be 5 digits |
-| TC03 | 0000 | 40 | InvalidPinFormatException | PIN must be 5 digits |
-| TC04 | 0000 | 500 | InvalidPinFormatException | PIN must be 5 digits |
-| TC05 | 0000 | 980 | InvalidPinFormatException | PIN must be 5 digits |
-| TC06 | 0000 | 1,000 | InvalidPinFormatException | PIN must be 5 digits |
-| TC07 | 0000 | 1,020 | InvalidPinFormatException | PIN must be 5 digits |
-| TC08 | 00000 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
-| TC09 | 00000 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC10 | 00000 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC11 | 00000 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC12 | 00000 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC13 | 00000 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC14 | 00000 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
-| TC15 | 00001 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
-| TC16 | 00001 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC17 | 00001 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC18 | 00001 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC19 | 00001 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC20 | 00001 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC21 | 00001 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
-| TC22 | 55555 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
-| TC23 | 55555 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC24 | 55555 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC25 | 55555 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC26 | 55555 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC27 | 55555 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC28 | 55555 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
-| TC29 | 99998 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
-| TC30 | 99998 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC31 | 99998 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC32 | 99998 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC33 | 99998 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC34 | 99998 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC35 | 99998 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
-| TC36 | 99999 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
-| TC37 | 99999 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC38 | 99999 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC39 | 99999 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC40 | 99999 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC41 | 99999 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC42 | 99999 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
-| TC43 | 100000 | 0 | InvalidPinFormatException | PIN must be 5 digits |
-| TC44 | 100000 | 20 | InvalidPinFormatException | PIN must be 5 digits |
-| TC45 | 100000 | 40 | InvalidPinFormatException | PIN must be 5 digits |
-| TC46 | 100000 | 500 | InvalidPinFormatException | PIN must be 5 digits |
-| TC47 | 100000 | 980 | InvalidPinFormatException | PIN must be 5 digits |
-| TC48 | 100000 | 1,000 | InvalidPinFormatException | PIN must be 5 digits |
-| TC49 | 100000 | 1,020 | InvalidPinFormatException | PIN must be 5 digits |
+| TC01 | 0000 | 500 | InvalidPinFormatException | PIN must be 5 digits |
+| TC02 | 00000 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC03 | 00001 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC04 | 55555 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC05 | 99998 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC06 | 99999 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC07 | 100000 | 500 | InvalidPinFormatException | PIN must be 5 digits |
+
+**Withdrawal amount** (`sessionAmountTest`, PIN held at 55555)
+
+| ID | PIN | Amount | Expected | Spec rule |
+|---|---|---|---|---|
+| TC08 | 55555 | 0 | InvalidAmountException | Assumption 2: $0 is an invalid amount |
+| TC09 | 55555 | 20 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC10 | 55555 | 40 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC11 | 55555 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC12 | 55555 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC13 | 55555 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
+| TC14 | 55555 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
 
 ### Test results
 
-From the CI run on PR #6 (49 run, 42 failed, 7 passed).
+From a local run of `mvn -B test` (14 run, 13 failed, 1 passed).
 
 | ID | Result |
 |---|---|
@@ -94,7 +67,7 @@ From the CI run on PR #6 (49 run, 42 failed, 7 passed).
 | TC04 | Fail |
 | TC05 | Fail |
 | TC06 | Fail |
-| TC07 | Fail |
+| TC07 | Pass |
 | TC08 | Fail |
 | TC09 | Fail |
 | TC10 | Fail |
@@ -102,54 +75,17 @@ From the CI run on PR #6 (49 run, 42 failed, 7 passed).
 | TC12 | Fail |
 | TC13 | Fail |
 | TC14 | Fail |
-| TC15 | Fail |
-| TC16 | Fail |
-| TC17 | Fail |
-| TC18 | Fail |
-| TC19 | Fail |
-| TC20 | Fail |
-| TC21 | Fail |
-| TC22 | Fail |
-| TC23 | Fail |
-| TC24 | Fail |
-| TC25 | Fail |
-| TC26 | Fail |
-| TC27 | Fail |
-| TC28 | Fail |
-| TC29 | Fail |
-| TC30 | Fail |
-| TC31 | Fail |
-| TC32 | Fail |
-| TC33 | Fail |
-| TC34 | Fail |
-| TC35 | Fail |
-| TC36 | Fail |
-| TC37 | Fail |
-| TC38 | Fail |
-| TC39 | Fail |
-| TC40 | Fail |
-| TC41 | Fail |
-| TC42 | Fail |
-| TC43 | Pass |
-| TC44 | Pass |
-| TC45 | Pass |
-| TC46 | Pass |
-| TC47 | Pass |
-| TC48 | Pass |
-| TC49 | Pass |
 
 ### Failure log
 
-Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, choosing the BVA values, writing the 49 tests).
-
 | Failure ID | Exposing tests | Time testing before found | Time diagnosing |
 |---|---|---|---|
-| F1 | TC08–TC42 (valid 5-digit PIN rejected with `InvalidPinFormatException`) | 90 | 15 |
-| F2 | TC01–TC07 (invalid 4-digit PIN 0000 accepted; in TC05 this lets the test reach the amount check, where F3 shows up) | 90 | 5 |
-| F3 | TC05 (valid amount $980 rejected with `InvalidAmountException`) | 90 | 15 |
+| SF1 | TC02–TC06, TC08–TC14 (valid 5-digit PIN rejected with `InvalidPinFormatException`) | 90 | 15 |
+| SF2 | TC01 (invalid 4-digit PIN 0000 accepted) | 90 | 5 |
 
 Faults found by reading the code but hidden by F1 (no test fails on them yet):
 
-- `FormatChecker.checkPinFormat`, line 35: `pin[i] >= '9'` rejects the digit 9. Should show up in TC29–TC42 once F1 is fixed.
-- `CashValidator.validateWithdrawal` accepts $0. Should show up in TC08, TC15, TC22, TC29 and TC36.
-- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14, TC21, TC28, TC35 and TC42.
+- `FormatChecker.checkPinFormat`, line 35: `pin[i] >= '9'` rejects the digit 9. Should show up in TC05 and TC06 once F1 is fixed.
+- `CashValidator.validateWithdrawal` accepts $0. Should show up in TC08.
+- `CashValidator.validateWithdrawal` rejects the valid amount $980 (14 × $50 + 9 × $20), because it uses as many $50 bills as possible and then only tries $20 bills on the rest. Should show up in TC12.
+- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14.
