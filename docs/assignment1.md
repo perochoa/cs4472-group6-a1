@@ -24,7 +24,7 @@ Additionally, I mocked the bank class so that errors in the bank code don't affe
 **Assumptions.**
 
 1. We perform tests on PIN checking through the ATM class because the Session class doesn't actually validate the PIN, the ATM class does
-2. A $0 withdrawal should throw `InvalidAmountException` because it is an invalid amount
+2. A $0 or $1020 withdrawal should throw `InvalidAmountException` because it is an invalid amount
 3. PIN and amount are tested separately (instructor clarification), each with the other variable held at its nominal value
 
 ### Section 2: Test cases
