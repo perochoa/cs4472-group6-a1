@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  */
 class FeesCalculatorWithdrawalTest {
 
-	private static final double TOLERANCE = 0.0001;
+	private static final double TOLERANCE = 1e-6;
 
 	private final FeesCalculator calculator = new FeesCalculator();
 

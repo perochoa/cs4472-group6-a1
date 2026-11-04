@@ -136,7 +136,7 @@ Finally, **3 cross-check cases** (W134–W136) cover the invalid values of the i
 4. The day of the week uses the `java.util.Calendar` constants, as the parameter is an `int`: 1 = Sunday, 2 = Monday, …, 7 = Saturday. Saturday and Sunday are the weekend; Monday to Friday are weekdays. The robust values 0 and 8 aren't days. The BVA values happen to cover both weekend days (1, 7) and both ends of the week (2, 6).
 5. Invalid input (amount ≤ $0 or > $1,000, a negative balance, or a day outside 1–7) should throw an `IllegalArgumentException`. The spec doesn't say what should happen, and the method returns a fee, so an exception is the only clean way to reject the input; returning 0 would hide the error. This matches the deposit tests.
 6. A case with several invalid inputs at once (for example amount 0 and day 0) still expects one `IllegalArgumentException`.
-7. Expected and actual fees are compared with a tolerance of 0.0001, because `double` arithmetic can produce tiny rounding errors. The smallest fee difference that matters here is 0.1% of $1 = $0.001, ten times the tolerance.
+7. Expected and actual fees are compared with a tolerance of 1e-6 (0.000001), the same as the deposit and transfer tests, because `double` arithmetic can produce tiny rounding errors. The smallest fee difference that matters here is 0.1% of $1 = $0.001, 1,000 times the tolerance.
 
 ### Section 2: Test cases
 
