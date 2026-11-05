@@ -1,118 +1,43 @@
-## Transfer fees: Decision Table Analysis
+# Assignment 1: Black Box Testing
 
-**Target:** `bank.utils.FeesCalculator#calculateTransferFee(double amount, double fromAccountBalance, double toAccountBalance, boolean student)`
+CS 4472B, Group 6. Black box tests for the ATM system, derived from the Assignment 1 specification in the [README](../README.md#assignment-instructions). The sections follow the order of "The Testing Targets". Each one has Section 1 (process and assumptions) and Section 2 (test-case tables), followed by the test results and the failure log. The fault-localization table is in the graded pull request description.
 
-**Technique:** Decision Table Analysis
+| Target | Technique | JUnit class | Tests | Failed | Passed | Author |
+|---|---|---|---|---|---|---|
+| [`atm.session.Session`](#atm-session-robust-worst-case-boundary-value-analysis) (withdrawal) | Robust Worst Case BVA | `atm.SessionWithdrawalTest` | 14 | 13 | 1 | twang849 |
+| [`FeesCalculator#calculateWithdrawalFee`](#withdrawal-fees-robust-worst-case-boundary-value-analysis) | Robust Worst Case BVA | `bank.utils.FeesCalculatorWithdrawalTest` | 136 | 111 | 25 | perochoa |
+| [`FeesCalculator#calculateDepositInterest`](#deposit-fees-weak-robust-equivalence-class-analysis) | Weak Robust ECA | `bank.utils.FeesCalculatorDepositTest` | 16 | 15 | 1 | sophi3tong |
+| [`FeesCalculator#calculateTransferFee`](#transfer-fees-decision-table-analysis) | Decision Table Analysis | `bank.utils.FeesCalculatorTransferTest` | 16 | 16 | 0 | Blake-mb |
+| **Total** | | | **182** | **155** | **27** | |
 
-**Spec:** Assignment 1, "Transfer"
+Results are from the CI run on the graded `dev` → `main` pull request (the JUnit test report comment). The suite runs 185 tests: our 182 and the course's 3 sample tests, `atm.ATMTest` (2) and `bank.utils.FeesCalculatorTest` (1). We left the samples as provided. They pass, but they aren't among our test cases: `ATMTest.checkCorrectPINTest` uses a 4-digit PIN and passes only because of the PIN length fault (SF1, SF2), and `FeesCalculatorTest.withdrawalTest` uses day of week 0, which the withdrawal section treats as invalid input (withdrawal Assumption 5).
 
-**JUnit class:** `src/test/java/bank/utils/FeesCalculatorTransferTest.java`
+## Shared assumptions
 
-### Section 1: Process and assumptions
+These hold in every section. Each section also lists its own assumptions.
 
-**Process:** Working from the Transfer spec, I made a decision table with 4 binary conditions totalling 16 rules. The boundaries for _amount_, *fromAccountBalance*, and *toAccountBalance* depend on whether the user is a student or not.
-
-**Decision Table**
-| Condition | Rule 1 | Rule 2 | Rule 3 | Rule 4 | Rule 5 | Rule 6 | Rule 7 | Rule 8 | Rule 9 | Rule 10 | Rule 11 | Rule 12 | Rule 13 | Rule 14 | Rule 15 | Rule 16 |
-| :------ | -------: | -------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: |
-| _student_ | Y | Y | Y | Y | Y | Y | Y | Y | N | N | N | N | N | N | N | N |
-| _amount_ | <$200 | <$200 | <$200 | <$200 | >=$200 | >=$200 | >=$200 | >=$200 | <$100 | <$100 | <$100 | <$100 | >=$100 | >=$100 | >=$100 | >=$100 |
-| *fromAccountBalance* | <$2000 | <$2000 | >=$2000 | >=$2000 | <$2000 | <$2000 | >=$2000 | >=$2000 | <$4000 | <$4000 | >=$4000 | >=$4000 | <$2000 | <$2000 | >=$2000 | >=$2000 |
-| *toAccountBalance* | <$1000 | >=$1000 | <$1000 | >=$1000 | <$1000 | >=$1000 | <$1000 | >=$1000 | <$2000 | >=$2000 | <$2000 | >=$2000 | <$1000 | >=$1000 | <$1000 | >=$1000 |
-| _fee_ = 0.025% | | | | X | | X | | | | | | | | | | |
-| _fee_ = 0.05% | | X | X | | X | | | | | | | | | | | |
-| _fee_ = 0.1% | X | | | | | | | | | X | | | | X | | |
-| _fee_ = 0.125% | | | | | | | | X | | | | | | | | |
-| _fee_ = 0.2% | | | | | | | | | X | | | | X | | | |
-| _fee_ = 0.25% | | | | | | | X | | | | | | | | | X |
-| _fee_ = 0.5% | | | | | | | | | | | | X | | | X | |
-| _fee_ = 1% | | | | | | | | | | | X | | | | | |
-
-**Assumptions:** 
-
-1. The method returns the fee in dollars, calculated as rate * amount, where rate is a percent.
-
-2. Expected and actual fees are compared with tolerance `1e-6`, as double arithmetic may cause rounding errors.
-
-3. DTA is not concerned with validating input so there are no tests for invalidity.
-
-4. Values around thresholds assume each value is partitioned into two cases, < its threshold or >= to its threshold. As per the spec. 
-
-### Section 2: Test Cases
-
-|ID|_student_|_amount_|*fromAccountBalance*|*toAccountBalance*|Fee Rate (%)|Spec rule|
-|------|------|------|------|------|------|------|
-|DT1|true|199|1999|999|0.1|student, amount < 200, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.1%|
-|DT2|true|199|1999|1001|0.05|student, amount < 200, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.05%|
-|DT3|true|199|2001|999|0.05|student, amount < 200, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.05%|
-|DT4|true|199|2001|1001|0.025|student, amount < 200, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.025%|
-|DT5|true|201|1999|999|0.05|student, amount >= 200, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.05%|
-|DT6|true|201|1999|1001|0.025|student, amount >= 200, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.025%|
-|DT7|true|201|2001|999|0.25|student, amount >= 200, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.25%|
-|DT8|true|201|2001|1001|0.125|student, amount >= 200, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.125%|
-|DT9|false|99|3999|1999|0.2|non-student, amount < 100, fromAccountBalance < 4000, toAccountBalance < 2000 → 0.2%|
-|DT10|false|99|3999|2001|0.1|non-student, amount < 100, fromAccountBalance < 4000, toAccountBalance >= 2000 → 0.1%|
-|DT11|false|99|4001|1999|1.0|non-student, amount < 100, fromAccountBalance >= 4000, toAccountBalance < 2000 → 1.0%|
-|DT12|false|99|4001|2001|0.5|non-student, amount < 100, fromAccountBalance >= 4000, toAccountBalance >= 2000 → 0.5%|
-|DT13|false|101|1999|999|0.2|non-student, amount >= 100, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.2%|
-|DT14|false|101|1999|1001|0.1|non-student, amount >= 100, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.1%|
-|DT15|false|101|2001|999|0.5|non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.5%|
-|DT16|false|101|2001|1001|0.25|non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.25%|
-
-### Test results
-
-From the CI run on PR #11 (16 ran, 16 failed, 0 passed)
-
-|ID|Result|
-|--|--|
-|DT1|Fail|
-|DT2|Fail|
-|DT3|Fail|
-|DT4|Fail|
-|DT5|Fail|
-|DT6|Fail|
-|DT7|Fail|
-|DT8|Fail|
-|DT9|Fail|
-|DT10|Fail|
-|DT11|Fail|
-|DT12|Fail|
-|DT13|Fail|
-|DT14|Fail|
-|DT15|Fail|
-|DT16|Fail|
-
-### Failure Log
-
-Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, making the DTA table, writing the 16 tests).
-
-|Failure ID|Exposing tests|Time testing before found|Time diagnosing|
-|-|-|-|-|
-|TF1| DT1-DT4 (student, amount<$200 treated as >=$200)|60|15|
-|TF2| DT5-DT6 (student, amount>=$200, fromAccountBalance<$2000 treated as >=2000)|60|5|
-|TF3| DT7-DT8, DT12, DT15, DT16 (`FeesCalculator.java`, `calculateTransferFee` lines 103, 105, 121, 133, and 135 provide `feePercentage=0.025/0.0125/0.05/0.05/0.055` should be 0.0025, 0.00125, 0.005, 0.005, and 0.0025) |60|5|
-|TF4| DT9-DT10 (non-student, amount<$100,  fromAccountBalance<$4000 treated as >=$4000) |60|5|
-|TF5| DT11 (non-student, amount<$100, fromAccountBalance>=$4000, toAccountBalance<$2000 treated as >=$2000) |60|5|
-|TF6| DT13-DT14 (non-student, amount>=$100, fromAccountBalance<$2000 treated as >=$2000) |60|5|
-
-- Branch conditions on lines 80,81,95,111,112,118,125 are incorrect according to the spec,
-- % Values given at lines 83,85,89,91,97,99,103,105,113,115,119,121,127,129,133,135 are also incorrect according to the spec.
+1. **Fees.** Every `FeesCalculator` method returns the fee in dollars, rate × amount. `calculateDepositInterest` returns the deposit fee.
+2. **Tolerance.** All fee tests compare expected and actual fees with a tolerance of `1e-6`, because `double` arithmetic can produce tiny rounding errors.
+3. **Invalid input.** The spec doesn't say how `FeesCalculator` should handle invalid input, so the withdrawal and deposit tests expect an `IllegalArgumentException` for an amount of $0 or less or a negative balance (and, for withdrawals, an amount over the $1,000 daily limit or a day outside 1–7). Decision table analysis covers only the spec's rules, so the transfer tests have no invalid input. For `Session`, the spec names the exceptions: `InvalidPinFormatException` and `InvalidAmountException`.
+4. **Robust worst case BVA.** Each variable takes its robust boundary values (min−, min, min+, nominal, max−, max, max+), and every value of one input is combined with every value of the others (Cartesian product: 7ⁿ cases for n variables with 7 values each), instead of holding all but one input at nominal. The withdrawal fee tests use this definition. They first split on `student`, because the spec makes students depend on the day and non-students on the balance, and they give the balance 12 values to cover its internal $1,000 and $5,000 boundaries (see that section). For `Session`, the instructor clarified that the PIN and the withdrawal amount are separate test targets, so each is tested on its own with the other held at its nominal value. With one variable, worst case gives 7¹ = 7 cases, the same as robust BVA under the single fault assumption (6 × 1 + 1).
+5. **Fault localization.** Each failure is mapped to the first wrong condition or statement on the path its tests take. Faults that no test reaches yet, because another fault sends every test down a different branch, aren't in the fault-localization table. They're listed after each section's failure log.
+6. **Failure log.** Every section uses the same columns: `Failure ID | Exposing tests | Time testing before found | Time diagnosing`, with rough times in minutes. The IDs are SF (Session), WF (withdrawal), DF (deposit) and TF (transfer).
+7. **No fixes.** This is the `phase:tests` phase, so none of the faults are fixed in the source.
 
 ## ATM Session: Robust Worst Case Boundary Value Analysis
 
-**Target:** `atm.session.Session` (driven through `atm.ATM`)
-**Technique:** Robust Worst Case Boundary Value Analysis
-**Spec:** Assignment 1, "ATM Session" and "The Testing Targets"
-**JUnit class:** `src/test/java/atm/SessionWithdrawalTest.java`
+- **Target:** `atm.session.Session` (driven through `atm.ATM`)
+- **Technique:** Robust Worst Case Boundary Value Analysis
+- **Spec:** Assignment 1, "ATM Session" and "The Testing Targets"
+- **JUnit class:** `src/test/java/atm/SessionWithdrawalTest.java`
 
 ### Section 1: Process and assumptions
 
-**Process.** 
-I used 7 values for the robust boundary value analysis of min-, min, min+, nominal value, max-, max, and max+ for both the PIN number and the amount. The range of valid PIN numbers can be defined as from 00000 to 99999, so we can define the values around max and min at those values, and choose the nominal value at the halfway point. The same is done for amount at the range of 20 (the minimum for a $20 or $50 withdrawal) to $1000 (daily limit).
+**Process.** I used 7 values for the robust boundary value analysis of min-, min, min+, nominal value, max-, max, and max+ for both the PIN number and the amount. The range of valid PIN numbers can be defined as from 00000 to 99999, so we can define the values around max and min at those values, and choose a mid-range nominal value. The same is done for amount at the range of 20 (the minimum for a $20 or $50 withdrawal) to $1000 (daily limit).
 
 As the instructor clarified, the PIN and the withdrawal amount are separate test targets, so I tested them separately instead of combining them. The PIN tests use the 7 PIN values with the amount held at its nominal value ($500), and the amount tests use the 7 amount values with the PIN held at its nominal value (55555). With one variable, robust worst case BVA gives the same 7 values as robust BVA under the single fault assumption (7^1 = 6 × 1 + 1), so these tests are both worst case and single fault. This gives 7 + 7 = 14 test cases.
 
-Additionally, I mocked the bank class so that errors in the bank code don't affect what we're testing, the ATM Session code. We also avoid having to set up the bank database.
+Additionally, I mocked the bank side (`MessageDispatcher`) and the UI panel (`MainPanel`) so that errors in the bank code don't affect what we're testing, the ATM Session code. We also avoid having to set up the bank database.
 
 **Input values.**
 
@@ -155,11 +80,11 @@ Account: daily limit $1,000, available balance $5,000.
 | TC11 | 55555 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
 | TC12 | 55555 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
 | TC13 | 55555 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC14 | 55555 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
+| TC14 | 55555 | 1,020 | InvalidAmountException | Assumption 2: amount over the $1,000 daily limit is invalid |
 
 ### Test results
 
-From a local run of `mvn -B test` (14 run, 13 failed, 1 passed).
+From the CI run on the graded `dev` → `main` pull request (14 run, 13 failed, 1 passed).
 
 | ID | Result |
 |---|---|
@@ -190,112 +115,17 @@ Times are rough, in minutes.
 Faults found by reading the code but hidden by SF1 (no test fails on them yet):
 
 - `FormatChecker.checkPinFormat`, line 35: `pin[i] >= '9'` rejects the digit 9. Should show up in TC05 and TC06 once SF1 is fixed.
+- `FormatChecker.checkPinFormat`, line 34: the digit loop also stops at 4 (`i < 4`), so fixing only the length check on line 33 would leave the fifth character unchecked. No test covers this yet, since every test PIN is all digits.
 - `CashValidator.validateWithdrawal` accepts $0. Should show up in TC08.
 - `CashValidator.validateWithdrawal` rejects the valid amount $980 (18 × $50 + 4 × $20), because it uses as many $50 bills as possible and then only tries $20 bills on the rest. Should show up in TC12.
-- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14.
-
-## Deposit fees: Weak Robust Equivalence Class Analysis
-
-**Target:** `bank.utils.FeesCalculator#calculateDepositInterest(double amount, double accountBalance, boolean student)`
-**Technique:** Weak Robust Equivalence Class Analysis
-**Spec:** Assignment 1, "Deposit"
-**JUnit class:** `src/test/java/bank/utils/FeesCalculatorDepositTest.java`
-
-### Section 1: Process and assumptions
-
-**Process.** I split each input into equivalence classes using only the Deposit specification. The amount and balance boundaries depend on whether the client is a student, so I defined the classes separately for students and non-students. For the valid part, I picked one representative value from the middle of each class (not on a boundary, since boundaries are covered by BVA, not ECA). I made sure every valid class appears in at least one test and that each of the spec's outcomes (0.5%, 0.25%, 0.8%, 0.4%, 0.1%, no fee) is checked. For the robust part, I tested each invalid class (A5, A6, B7) once for a student and once for a non-student, since the valid classes for the other inputs differ between the two. In each of these tests exactly one input is invalid and the others are valid (single fault assumption).
-
-**Equivalence classes.**
-
-| Variable | Class | Range | Valid? |
-|---|---|---|---|
-| student | S1 | true | valid |
-| student | S2 | false | valid |
-| amount (student) | A1 | 0 < amount ≤ 50 | valid |
-| amount (student) | A2 | amount > 50 | valid |
-| amount (non-student) | A3 | 0 < amount ≤ 250 | valid |
-| amount (non-student) | A4 | amount > 250 | valid |
-| amount | A5 | amount < 0 | invalid |
-| amount | A6 | amount = 0 | invalid |
-| balance (student) | B1 | 0 ≤ balance ≤ 500 | valid |
-| balance (student) | B2 | 500 < balance ≤ 5,000 | valid |
-| balance (student) | B3 | balance > 5,000 | valid |
-| balance (non-student) | B4 | 0 ≤ balance ≤ 2,500 | valid |
-| balance (non-student) | B5 | 2,500 < balance ≤ 10,000 | valid |
-| balance (non-student) | B6 | balance > 10,000 | valid |
-| balance | B7 | balance < 0 | invalid |
-
-**Assumptions.**
-
-1. The method returns the fee in dollars, calculated as rate × amount (for example, 0.5% of $100 = $0.50).
-2. The method is named `calculateDepositInterest`, but the spec calls this value a fee. I treat them as the same thing.
-3. A deposit amount of $0 or less, or a negative balance, is invalid input (depositing nothing is not a real transaction). $0 does not belong to any valid amount class, so it is its own invalid class (A6). The spec doesn't say what should happen, so I assume the method should throw an `IllegalArgumentException`.
-4. A balance of $0 is valid (an empty account can receive a deposit).
-5. Expected and actual fees are compared with a tolerance of `1e-6` (0.000001), because `double` arithmetic can produce tiny rounding errors.
-
-### Section 2: Test cases
-
-| ID | Student | Amount | Balance | Classes covered | Expected fee | Spec rule |
-|---|---|---|---|---|---|---|
-| D1 | true | 100 | 1,000 | S1, A2, B2 | 0.50 | student, amount > 50, balance > 500 → 0.5% |
-| D2 | true | 100 | 300 | S1, A2, B1 | 0.25 | student, amount > 50, balance ≤ 500 → 0.25% |
-| D3 | true | 20 | 6,000 | S1, A1, B3 | 0.10 | student, amount ≤ 50, balance > 5,000 → 0.5% |
-| D4 | true | 20 | 300 | S1, A1, B1 | 0.00 | student, amount ≤ 50, balance ≤ 5,000 → no fee |
-| D5 | true | 20 | 2,000 | S1, A1, B2 | 0.00 | student, amount ≤ 50, balance ≤ 5,000 → no fee |
-| D6 | false | 500 | 3,000 | S2, A4, B5 | 4.00 | non-student, amount > 250, balance > 2,500 → 0.8% |
-| D7 | false | 500 | 1,000 | S2, A4, B4 | 2.00 | non-student, amount > 250, balance ≤ 2,500 → 0.4% |
-| D8 | false | 100 | 20,000 | S2, A3, B6 | 0.00 | non-student, amount ≤ 250, balance > 10,000 → no fee |
-| D9 | false | 100 | 5,000 | S2, A3, B5 | 0.10 | non-student, amount ≤ 250, balance ≤ 10,000 → 0.1% |
-| D10 | false | 100 | 1,000 | S2, A3, B4 | 0.10 | non-student, amount ≤ 250, balance ≤ 10,000 → 0.1% |
-| D11 | true | −10 | 1,000 | S1, **A5**, B2 | IllegalArgumentException | Assumption 3 |
-| D12 | true | 100 | −1 | S1, A2, **B7** | IllegalArgumentException | Assumption 3 |
-| D13 | false | −10 | 1,000 | S2, **A5**, B4 | IllegalArgumentException | Assumption 3 |
-| D14 | false | 100 | −1 | S2, A3, **B7** | IllegalArgumentException | Assumption 3 |
-| D15 | true | 0 | 1,000 | S1, **A6**, B2 | IllegalArgumentException | Assumption 3 |
-| D16 | false | 0 | 1,000 | S2, **A6**, B4 | IllegalArgumentException | Assumption 3 |
-
-### Test results
-
-From the CI run on PR #7 (16 run, 15 failed, 1 passed).
-
-| ID | Result |
-|---|---|
-| D1 | Fail |
-| D2 | Fail |
-| D3 | Pass |
-| D4 | Fail |
-| D5 | Fail |
-| D6 | Fail |
-| D7 | Fail |
-| D8 | Fail |
-| D9 | Fail |
-| D10 | Fail |
-| D11 | Fail |
-| D12 | Fail |
-| D13 | Fail |
-| D14 | Fail |
-| D15 | Fail |
-| D16 | Fail |
-
-### Failure log
-
-Times are rough, in minutes. All failures appeared in the same first run of the suite, so they share one testing time (deriving the cases and writing the tests). Diagnosis was done one failure at a time after that run.
-
-| Failure ID | Exposing tests | Time testing before found | Time diagnosing |
-|---|---|---|---|
-| DF1 | D1, D2 (student, amount > $50 treated as ≤ $50: threshold is $100 in code) | 70 | 15 |
-| DF2 | D4, D5 (student, amount ≤ $50, balance ≤ $5,000 charged 0.2% instead of no fee) | 70 | 10 |
-| DF3 | D6, D7 (non-student, amount > $250 treated as ≤ $250: threshold is $500 in code) | 70 | 10 |
-| DF4 | D8 (non-student, amount ≤ $250, balance > $10,000 charged 0.5% instead of no fee) | 70 | 5 |
-| DF5 | D9, D10 (non-student, amount ≤ $250, balance ≤ $10,000 charged nothing instead of 0.1%) | 70 | 5 |
-| DF6 | D11–D16 (invalid amount or balance accepted, no `IllegalArgumentException`) | 70 | 5 |
+- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14 (Assumption 2).
 
 ## Withdrawal fees: Robust Worst Case Boundary Value Analysis
 
-**Target:** `bank.utils.FeesCalculator#calculateWithdrawalFee(double amount, double accountBalance, boolean student, int dayOfWeek)`
-**Technique:** Robust Worst Case Boundary Value Analysis
-**Spec:** Assignment 1, "Withdrawal"
-**JUnit class:** `src/test/java/bank/utils/FeesCalculatorWithdrawalTest.java`
+- **Target:** `bank.utils.FeesCalculator#calculateWithdrawalFee(double amount, double accountBalance, boolean student, int dayOfWeek)`
+- **Technique:** Robust Worst Case Boundary Value Analysis
+- **Spec:** Assignment 1, "Withdrawal"
+- **JUnit class:** `src/test/java/bank/utils/FeesCalculatorWithdrawalTest.java`
 
 ### Section 1: Process and assumptions
 
@@ -479,7 +309,7 @@ Expected fee in dollars. Student cases use a balance of $3,000; non-student case
 
 ### Test results
 
-From the CI run on PR #10 (136 run, 111 failed, 25 passed).
+From the CI run on the graded `dev` → `main` pull request (136 run, 111 failed, 25 passed).
 
 | ID | Result |
 |---|---|
@@ -630,3 +460,217 @@ Times are rough, in minutes. All four failures appeared in the same first run of
 | WF2 | W63–W66, W75–W78, W87–W90, W99–W102, W111–W114 (non-student, balance < $1,000) | 170 | 20 |
 | WF3 | W71, W72, W83, W84, W95, W96, W107, W108, W119, W120 (non-student, balance $5,000–$5,000.01) | 170 | 25 |
 | WF4 | all 56 invalid-input cases (W1–W8, W14, W15, W21, W22, W28, W29, W35, W36, W42–W62, W74, W86, W98, W110, W122–W136) | 170 | 10 |
+
+## Deposit fees: Weak Robust Equivalence Class Analysis
+
+- **Target:** `bank.utils.FeesCalculator#calculateDepositInterest(double amount, double accountBalance, boolean student)`
+- **Technique:** Weak Robust Equivalence Class Analysis
+- **Spec:** Assignment 1, "Deposit"
+- **JUnit class:** `src/test/java/bank/utils/FeesCalculatorDepositTest.java`
+
+### Section 1: Process and assumptions
+
+**Process.** I split each input into equivalence classes using only the Deposit specification. The amount and balance boundaries depend on whether the client is a student, so I defined the classes separately for students and non-students. For the valid part, I picked one representative value from the middle of each class (not on a boundary, since boundaries are covered by BVA, not ECA). I made sure every valid class appears in at least one test and that each of the spec's outcomes (0.5%, 0.25%, 0.8%, 0.4%, 0.1%, no fee) is checked. For the robust part, I tested each invalid class (A5, A6, B7) once for a student and once for a non-student, since the valid classes for the other inputs differ between the two. In each of these tests exactly one input is invalid and the others are valid (single fault assumption).
+
+**Equivalence classes.**
+
+| Variable | Class | Range | Valid? |
+|---|---|---|---|
+| student | S1 | true | valid |
+| student | S2 | false | valid |
+| amount (student) | A1 | 0 < amount ≤ 50 | valid |
+| amount (student) | A2 | amount > 50 | valid |
+| amount (non-student) | A3 | 0 < amount ≤ 250 | valid |
+| amount (non-student) | A4 | amount > 250 | valid |
+| amount | A5 | amount < 0 | invalid |
+| amount | A6 | amount = 0 | invalid |
+| balance (student) | B1 | 0 ≤ balance ≤ 500 | valid |
+| balance (student) | B2 | 500 < balance ≤ 5,000 | valid |
+| balance (student) | B3 | balance > 5,000 | valid |
+| balance (non-student) | B4 | 0 ≤ balance ≤ 2,500 | valid |
+| balance (non-student) | B5 | 2,500 < balance ≤ 10,000 | valid |
+| balance (non-student) | B6 | balance > 10,000 | valid |
+| balance | B7 | balance < 0 | invalid |
+
+**Assumptions.**
+
+1. The method returns the fee in dollars, calculated as rate × amount (for example, 0.5% of $100 = $0.50).
+2. The method is named `calculateDepositInterest`, but the spec calls this value a fee. I treat them as the same thing.
+3. A deposit amount of $0 or less, or a negative balance, is invalid input (depositing nothing is not a real transaction). $0 does not belong to any valid amount class, so it is its own invalid class (A6). The spec doesn't say what should happen, so I assume the method should throw an `IllegalArgumentException`.
+4. A balance of $0 is valid (an empty account can receive a deposit).
+5. Expected and actual fees are compared with a tolerance of `1e-6` (0.000001), because `double` arithmetic can produce tiny rounding errors.
+
+### Section 2: Test cases
+
+| ID | Student | Amount | Balance | Classes covered | Expected fee | Spec rule |
+|---|---|---|---|---|---|---|
+| D1 | true | 100 | 1,000 | S1, A2, B2 | 0.50 | student, amount > 50, balance > 500 → 0.5% |
+| D2 | true | 100 | 300 | S1, A2, B1 | 0.25 | student, amount > 50, balance ≤ 500 → 0.25% |
+| D3 | true | 20 | 6,000 | S1, A1, B3 | 0.10 | student, amount ≤ 50, balance > 5,000 → 0.5% |
+| D4 | true | 20 | 300 | S1, A1, B1 | 0.00 | student, amount ≤ 50, balance ≤ 5,000 → no fee |
+| D5 | true | 20 | 2,000 | S1, A1, B2 | 0.00 | student, amount ≤ 50, balance ≤ 5,000 → no fee |
+| D6 | false | 500 | 3,000 | S2, A4, B5 | 4.00 | non-student, amount > 250, balance > 2,500 → 0.8% |
+| D7 | false | 500 | 1,000 | S2, A4, B4 | 2.00 | non-student, amount > 250, balance ≤ 2,500 → 0.4% |
+| D8 | false | 100 | 20,000 | S2, A3, B6 | 0.00 | non-student, amount ≤ 250, balance > 10,000 → no fee |
+| D9 | false | 100 | 5,000 | S2, A3, B5 | 0.10 | non-student, amount ≤ 250, balance ≤ 10,000 → 0.1% |
+| D10 | false | 100 | 1,000 | S2, A3, B4 | 0.10 | non-student, amount ≤ 250, balance ≤ 10,000 → 0.1% |
+| D11 | true | −10 | 1,000 | S1, **A5**, B2 | IllegalArgumentException | Assumption 3 |
+| D12 | true | 100 | −1 | S1, A2, **B7** | IllegalArgumentException | Assumption 3 |
+| D13 | false | −10 | 1,000 | S2, **A5**, B4 | IllegalArgumentException | Assumption 3 |
+| D14 | false | 100 | −1 | S2, A3, **B7** | IllegalArgumentException | Assumption 3 |
+| D15 | true | 0 | 1,000 | S1, **A6**, B2 | IllegalArgumentException | Assumption 3 |
+| D16 | false | 0 | 1,000 | S2, **A6**, B4 | IllegalArgumentException | Assumption 3 |
+
+### Test results
+
+From the CI run on the graded `dev` → `main` pull request (16 run, 15 failed, 1 passed).
+
+| ID | Result |
+|---|---|
+| D1 | Fail |
+| D2 | Fail |
+| D3 | Pass |
+| D4 | Fail |
+| D5 | Fail |
+| D6 | Fail |
+| D7 | Fail |
+| D8 | Fail |
+| D9 | Fail |
+| D10 | Fail |
+| D11 | Fail |
+| D12 | Fail |
+| D13 | Fail |
+| D14 | Fail |
+| D15 | Fail |
+| D16 | Fail |
+
+### Failure log
+
+Times are rough, in minutes. All failures appeared in the same first run of the suite, so they share one testing time (deriving the cases and writing the tests). Diagnosis was done one failure at a time after that run.
+
+| Failure ID | Exposing tests | Time testing before found | Time diagnosing |
+|---|---|---|---|
+| DF1 | D1, D2 (student, amount > $50 treated as ≤ $50: threshold is $100 in code) | 70 | 15 |
+| DF2 | D4, D5 (student, amount ≤ $50, balance ≤ $5,000 charged 0.2% instead of no fee) | 70 | 10 |
+| DF3 | D6, D7 (non-student, amount > $250 treated as ≤ $250: threshold is $500 in code) | 70 | 10 |
+| DF4 | D8 (non-student, amount ≤ $250, balance > $10,000 charged 0.5% instead of no fee) | 70 | 5 |
+| DF5 | D9, D10 (non-student, amount ≤ $250, balance ≤ $10,000 charged nothing instead of 0.1%) | 70 | 5 |
+| DF6 | D11–D16 (invalid amount or balance accepted, no `IllegalArgumentException`) | 70 | 5 |
+
+Faults found by reading the code but hidden by DF1 and DF3 (no test reaches these branches yet):
+
+- `FeesCalculator.calculateDepositInterest`, lines 41–44 (student, amount > $50): the balance check is `accountBalance > 1000.00` instead of $500, and the rates are 1% and 0.5% instead of 0.5% and 0.25%. DF1 sends D1 and D2 away from this branch.
+- `FeesCalculator.calculateDepositInterest`, lines 55–58 (non-student, amount > $250): the balance check is `accountBalance > 5000.00` instead of $2,500, and the rates are 1% and 0.5% instead of 0.8% and 0.4%. DF3 sends D6 and D7 away from this branch.
+
+## Transfer fees: Decision Table Analysis
+
+- **Target:** `bank.utils.FeesCalculator#calculateTransferFee(double amount, double fromAccountBalance, double toAccountBalance, boolean student)`
+- **Technique:** Decision Table Analysis
+- **Spec:** Assignment 1, "Transfer"
+- **JUnit class:** `src/test/java/bank/utils/FeesCalculatorTransferTest.java`
+
+### Section 1: Process and assumptions
+
+**Process.** Working from the Transfer spec, I made a decision table with 4 binary conditions, giving 16 rules. The thresholds for _amount_, _fromAccountBalance_ and _toAccountBalance_ depend on whether the client is a student. Every rule maps to exactly one fee, and each rule gets one test case (DT1–DT16 = Rule 1–Rule 16).
+
+**Decision table.**
+
+| Condition | Rule 1 | Rule 2 | Rule 3 | Rule 4 | Rule 5 | Rule 6 | Rule 7 | Rule 8 | Rule 9 | Rule 10 | Rule 11 | Rule 12 | Rule 13 | Rule 14 | Rule 15 | Rule 16 |
+| :------ | -------: | -------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: | ------: |
+| _student_ | Y | Y | Y | Y | Y | Y | Y | Y | N | N | N | N | N | N | N | N |
+| _amount_ | <$200 | <$200 | <$200 | <$200 | >=$200 | >=$200 | >=$200 | >=$200 | <$100 | <$100 | <$100 | <$100 | >=$100 | >=$100 | >=$100 | >=$100 |
+| _fromAccountBalance_ | <$2000 | <$2000 | >=$2000 | >=$2000 | <$2000 | <$2000 | >=$2000 | >=$2000 | <$4000 | <$4000 | >=$4000 | >=$4000 | <$2000 | <$2000 | >=$2000 | >=$2000 |
+| _toAccountBalance_ | <$1000 | >=$1000 | <$1000 | >=$1000 | <$1000 | >=$1000 | <$1000 | >=$1000 | <$2000 | >=$2000 | <$2000 | >=$2000 | <$1000 | >=$1000 | <$1000 | >=$1000 |
+| _fee_ = 0.025% | | | | X | | X | | | | | | | | | | |
+| _fee_ = 0.05% | | X | X | | X | | | | | | | | | | | |
+| _fee_ = 0.1% | X | | | | | | | | | X | | | | X | | |
+| _fee_ = 0.125% | | | | | | | | X | | | | | | | | |
+| _fee_ = 0.2% | | | | | | | | | X | | | | X | | | |
+| _fee_ = 0.25% | | | | | | | X | | | | | | | | | X |
+| _fee_ = 0.5% | | | | | | | | | | | | X | | | X | |
+| _fee_ = 1% | | | | | | | | | | | X | | | | | |
+
+**Assumptions.**
+
+1. The method returns the fee in dollars, calculated as rate × amount, where the spec gives the rate as a percentage (for example, 0.1% of $199 = $0.199).
+2. Expected and actual fees are compared with a tolerance of `1e-6`, as `double` arithmetic may cause rounding errors.
+3. Decision table analysis covers the spec's rules, not input validation, so there are no tests with invalid input.
+4. Each condition splits its variable at the spec's threshold into two cases, below it (<) or at or above it (>=), as the spec words them. Each test takes a value $1 either side of the threshold (for example $199 and $201 for the $200 student amount threshold).
+
+### Section 2: Test cases
+
+Expected fee in dollars (amount × fee rate).
+
+| ID | Student | Amount | From balance | To balance | Fee rate | Expected fee | Spec rule |
+|---|---|---|---|---|---|---|---|
+| DT1 | true | 199 | 1,999 | 999 | 0.1% | 0.199 | student, amount < 200, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.1% |
+| DT2 | true | 199 | 1,999 | 1,001 | 0.05% | 0.0995 | student, amount < 200, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.05% |
+| DT3 | true | 199 | 2,001 | 999 | 0.05% | 0.0995 | student, amount < 200, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.05% |
+| DT4 | true | 199 | 2,001 | 1,001 | 0.025% | 0.04975 | student, amount < 200, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.025% |
+| DT5 | true | 201 | 1,999 | 999 | 0.05% | 0.1005 | student, amount >= 200, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.05% |
+| DT6 | true | 201 | 1,999 | 1,001 | 0.025% | 0.05025 | student, amount >= 200, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.025% |
+| DT7 | true | 201 | 2,001 | 999 | 0.25% | 0.5025 | student, amount >= 200, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.25% |
+| DT8 | true | 201 | 2,001 | 1,001 | 0.125% | 0.25125 | student, amount >= 200, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.125% |
+| DT9 | false | 99 | 3,999 | 1,999 | 0.2% | 0.198 | non-student, amount < 100, fromAccountBalance < 4000, toAccountBalance < 2000 → 0.2% |
+| DT10 | false | 99 | 3,999 | 2,001 | 0.1% | 0.099 | non-student, amount < 100, fromAccountBalance < 4000, toAccountBalance >= 2000 → 0.1% |
+| DT11 | false | 99 | 4,001 | 1,999 | 1.0% | 0.99 | non-student, amount < 100, fromAccountBalance >= 4000, toAccountBalance < 2000 → 1.0% |
+| DT12 | false | 99 | 4,001 | 2,001 | 0.5% | 0.495 | non-student, amount < 100, fromAccountBalance >= 4000, toAccountBalance >= 2000 → 0.5% |
+| DT13 | false | 101 | 1,999 | 999 | 0.2% | 0.202 | non-student, amount >= 100, fromAccountBalance < 2000, toAccountBalance < 1000 → 0.2% |
+| DT14 | false | 101 | 1,999 | 1,001 | 0.1% | 0.101 | non-student, amount >= 100, fromAccountBalance < 2000, toAccountBalance >= 1000 → 0.1% |
+| DT15 | false | 101 | 2,001 | 999 | 0.5% | 0.505 | non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance < 1000 → 0.5% |
+| DT16 | false | 101 | 2,001 | 1,001 | 0.25% | 0.2525 | non-student, amount >= 100, fromAccountBalance >= 2000, toAccountBalance >= 1000 → 0.25% |
+
+### Test results
+
+From the CI run on the graded `dev` → `main` pull request (16 run, 16 failed, 0 passed).
+
+| ID | Result |
+|---|---|
+| DT1 | Fail |
+| DT2 | Fail |
+| DT3 | Fail |
+| DT4 | Fail |
+| DT5 | Fail |
+| DT6 | Fail |
+| DT7 | Fail |
+| DT8 | Fail |
+| DT9 | Fail |
+| DT10 | Fail |
+| DT11 | Fail |
+| DT12 | Fail |
+| DT13 | Fail |
+| DT14 | Fail |
+| DT15 | Fail |
+| DT16 | Fail |
+
+### Failure log
+
+Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, making the DTA table, writing the 16 tests). TF3 and TF7 were diagnosed together, in the same 5 minutes.
+
+| Failure ID | Exposing tests | Time testing before found | Time diagnosing |
+|---|---|---|---|
+| TF1 | DT1–DT4 (student, amount < $200 treated as ≥ $200: threshold is $100 in code) | 60 | 15 |
+| TF2 | DT5, DT6 (student, amount ≥ $200, fromAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
+| TF3 | DT7, DT8, DT12, DT15 (right branch, wrong rate: lines 103, 105, 121 and 133 are 10× the spec rate) | 60 | 5 |
+| TF4 | DT9, DT10 (non-student, amount < $100, fromAccountBalance < $4,000 treated as ≥ $4,000: threshold is $1,000 in code) | 60 | 5 |
+| TF5 | DT11 (non-student, amount < $100, fromAccountBalance ≥ $4,000, toAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
+| TF6 | DT13, DT14 (non-student, amount ≥ $100, fromAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
+| TF7 | DT16 (right branch, wrong rate: line 135 is `0.055`, 22× the spec's 0.25%) | 60 | with TF3 |
+
+Faults found by reading the code but hidden by TF1, TF2 and TF4–TF6 (no test reaches these branches yet). Every rate in `calculateTransferFee` is wrong, not only the ones TF3 and TF7 expose.
+
+| Line | Hidden by | Code | Spec |
+|---|---|---|---|
+| 81 | TF1 | `fromAccountBalance < 1000.00` | < $2,000 |
+| 83 | TF1 | `0.01` | 0.1% (0.001) |
+| 85 | TF1 | `0.005` | 0.05% (0.0005) |
+| 89 | TF1 | `0.05` | 0.05% (0.0005) |
+| 91 | TF1 | `0.025` | 0.025% (0.00025) |
+| 97 | TF2 | `0.005` | 0.05% (0.0005) |
+| 99 | TF2 | `0.0025` | 0.025% (0.00025) |
+| 112 | TF4 | `toAccountBalance < 1000.00` | < $2,000 |
+| 113 | TF4 | `0.02` | 0.2% (0.002) |
+| 115 | TF4 | `0.01` | 0.1% (0.001) |
+| 119 | TF5 | `0.1` | 1% (0.01) |
+| 127 | TF6 | `0.01` | 0.2% (0.002) |
+| 129 | TF6 | `0.005` | 0.1% (0.001) |
