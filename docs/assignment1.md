@@ -90,7 +90,7 @@ Times are rough, in minutes. All failures were found in the same test run, so "t
 |-|-|-|-|
 |TF1| DT1-DT4 (student, amount<$200 treated as >=$200)|60|15|
 |TF2| DT5-DT6 (student, amount>=$200, fromAccountBalance<$2000 treated as >=2000)|60|5|
-|TF3| DT7-DT8, DT12, DT15 (`FeesCalculator.java`, `calculateTransferFee` lines 103, 105, 121, 133, and 135 provide `feePercentage=0.025/0.0125/0.05/0.05/0.055` should be 0.0025, 0.00125, 0.005, 0.005, and 0.0025) |60|5|
+|TF3| DT7-DT8, DT12, DT15, DT16 (`FeesCalculator.java`, `calculateTransferFee` lines 103, 105, 121, 133, and 135 provide `feePercentage=0.025/0.0125/0.05/0.05/0.055` should be 0.0025, 0.00125, 0.005, 0.005, and 0.0025) |60|5|
 |TF4| DT9-DT10 (non-student, amount<$100,  fromAccountBalance<$4000 treated as >=$4000) |60|5|
 |TF5| DT11 (non-student, amount<$100, fromAccountBalance>=$4000, toAccountBalance<$2000 treated as >=$2000) |60|5|
 |TF6| DT13-DT14 (non-student, amount>=$100, fromAccountBalance<$2000 treated as >=$2000) |60|5|
