@@ -50,13 +50,13 @@ public class SessionWithdrawalTest {
 	@ParameterizedTest(name = "{0}: pin={1}, amount=500 -> {2} ({3})")
 	@DisplayName("Session withdrawal, PIN format")
 	@CsvSource({
-		"TC01, 0000, PIN_ERROR, 'PIN must be 5 digits'",
-		"TC02, 00000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC03, 00001, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC04, 55555, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC05, 99998, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC06, 99999, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC07, 100000, PIN_ERROR, 'PIN must be 5 digits'"
+		"TC01, 0000, PIN_ERROR, 'Spec ATM Session: PIN must be 5 digits'",
+		"TC02, 00000, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC03, 00001, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC04, 55555, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC05, 99998, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC06, 99999, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC07, 100000, PIN_ERROR, 'Spec ATM Session: PIN must be 5 digits'"
 	})
 	public void sessionPinFormatTest(String id, String pin, String expected, String rule) throws Exception {
 		runWithdrawal(id, pin, 500, expected, rule);
@@ -67,12 +67,12 @@ public class SessionWithdrawalTest {
 	@DisplayName("Session withdrawal, amount")
 	@CsvSource({
 		"TC08, 0, AMOUNT_ERROR, 'Assumption 2: $0 is an invalid amount'",
-		"TC09, 20, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC10, 40, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC11, 500, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC12, 980, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC13, 1000, OK, 'Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
-		"TC14, 1020, AMOUNT_ERROR, 'Amount over the $1,000 daily limit'"
+		"TC09, 20, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC10, 40, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC11, 500, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC12, 980, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC13, 1000, OK, 'Spec ATM Session: Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit'",
+		"TC14, 1020, AMOUNT_ERROR, 'Assumption 2: amount over the $1,000 daily limit is invalid'"
 	})
 	public void sessionAmountTest(String id, int amount, String expected, String rule) throws Exception {
 		runWithdrawal(id, "55555", amount, expected, rule);
