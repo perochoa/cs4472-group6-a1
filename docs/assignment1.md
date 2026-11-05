@@ -10,7 +10,7 @@ CS 4472B, Group 6. Black box tests for the ATM system, derived from the Assignme
 | [`FeesCalculator#calculateTransferFee`](#transfer-fees-decision-table-analysis) | Decision Table Analysis | `bank.utils.FeesCalculatorTransferTest` | 16 | 16 | 0 | Blake-mb |
 | **Total** | | | **182** | **155** | **27** | |
 
-Results are from the CI run on the graded `dev` → `main` pull request (the JUnit test report comment). The suite runs 185 tests: our 182 and the course's 3 sample tests, `atm.ATMTest` (2) and `bank.utils.FeesCalculatorTest` (1). We left the samples as provided. They pass, but they aren't among our test cases: `ATMTest.checkCorrectPINTest` uses a 4-digit PIN and passes only because of the PIN length fault (SF1, SF2), and `FeesCalculatorTest.withdrawalTest` uses day of week 0, which the withdrawal section treats as invalid input (Assumption 5).
+Results are from the CI run on the graded `dev` → `main` pull request (the JUnit test report comment). The suite runs 185 tests: our 182 and the course's 3 sample tests, `atm.ATMTest` (2) and `bank.utils.FeesCalculatorTest` (1). We left the samples as provided. They pass, but they aren't among our test cases: `ATMTest.checkCorrectPINTest` uses a 4-digit PIN and passes only because of the PIN length fault (SF1, SF2), and `FeesCalculatorTest.withdrawalTest` uses day of week 0, which the withdrawal section treats as invalid input (withdrawal Assumption 5).
 
 ## Shared assumptions
 
@@ -19,7 +19,7 @@ These hold in every section. Each section also lists its own assumptions.
 1. **Fees.** Every `FeesCalculator` method returns the fee in dollars, rate × amount. `calculateDepositInterest` returns the deposit fee.
 2. **Tolerance.** All fee tests compare expected and actual fees with a tolerance of `1e-6`, because `double` arithmetic can produce tiny rounding errors.
 3. **Invalid input.** The spec doesn't say how `FeesCalculator` should handle invalid input, so the withdrawal and deposit tests expect an `IllegalArgumentException` for an amount of $0 or less or a negative balance (and, for withdrawals, an amount over the $1,000 daily limit or a day outside 1–7). Decision table analysis covers only the spec's rules, so the transfer tests have no invalid input. For `Session`, the spec names the exceptions: `InvalidPinFormatException` and `InvalidAmountException`.
-4. **Robust worst case BVA.** Each variable takes 7 values (min−, min, min+, nominal, max−, max, max+), and the test cases are the Cartesian product of all variables (7ⁿ for n variables). The withdrawal fee tests use this definition. For `Session`, the instructor clarified that the PIN and the withdrawal amount are separate test targets, so each is tested on its own with the other held at its nominal value. With one variable, worst case gives 7¹ = 7 cases, the same as robust BVA under the single fault assumption (6 × 1 + 1).
+4. **Robust worst case BVA.** Each variable takes its robust boundary values (min−, min, min+, nominal, max−, max, max+), and every value of one input is combined with every value of the others (Cartesian product: 7ⁿ cases for n variables with 7 values each), instead of holding all but one input at nominal. The withdrawal fee tests use this definition. They first split on `student`, because the spec makes students depend on the day and non-students on the balance, and they give the balance 12 values to cover its internal $1,000 and $5,000 boundaries (see that section). For `Session`, the instructor clarified that the PIN and the withdrawal amount are separate test targets, so each is tested on its own with the other held at its nominal value. With one variable, worst case gives 7¹ = 7 cases, the same as robust BVA under the single fault assumption (6 × 1 + 1).
 5. **Fault localization.** Each failure is mapped to the first wrong condition or statement on the path its tests take. Faults that no test reaches yet, because another fault sends every test down a different branch, aren't in the fault-localization table. They're listed after each section's failure log.
 6. **Failure log.** Every section uses the same columns: `Failure ID | Exposing tests | Time testing before found | Time diagnosing`, with rough times in minutes. The IDs are SF (Session), WF (withdrawal), DF (deposit) and TF (transfer).
 7. **No fixes.** This is the `phase:tests` phase, so none of the faults are fixed in the source.
@@ -33,11 +33,11 @@ These hold in every section. Each section also lists its own assumptions.
 
 ### Section 1: Process and assumptions
 
-**Process.** I used 7 values for the robust boundary value analysis of min-, min, min+, nominal value, max-, max, and max+ for both the PIN number and the amount. The range of valid PIN numbers can be defined as from 00000 to 99999, so we can define the values around max and min at those values, and choose the nominal value at the halfway point. The same is done for amount at the range of 20 (the minimum for a $20 or $50 withdrawal) to $1000 (daily limit).
+**Process.** I used 7 values for the robust boundary value analysis of min-, min, min+, nominal value, max-, max, and max+ for both the PIN number and the amount. The range of valid PIN numbers can be defined as from 00000 to 99999, so we can define the values around max and min at those values, and choose a mid-range nominal value. The same is done for amount at the range of 20 (the minimum for a $20 or $50 withdrawal) to $1000 (daily limit).
 
 As the instructor clarified, the PIN and the withdrawal amount are separate test targets, so I tested them separately instead of combining them. The PIN tests use the 7 PIN values with the amount held at its nominal value ($500), and the amount tests use the 7 amount values with the PIN held at its nominal value (55555). With one variable, robust worst case BVA gives the same 7 values as robust BVA under the single fault assumption (7^1 = 6 × 1 + 1), so these tests are both worst case and single fault. This gives 7 + 7 = 14 test cases.
 
-Additionally, I mocked the bank class so that errors in the bank code don't affect what we're testing, the ATM Session code. We also avoid having to set up the bank database.
+Additionally, I mocked the bank side (`MessageDispatcher`) and the UI panel (`MainPanel`) so that errors in the bank code don't affect what we're testing, the ATM Session code. We also avoid having to set up the bank database.
 
 **Input values.**
 
@@ -80,7 +80,7 @@ Account: daily limit $1,000, available balance $5,000.
 | TC11 | 55555 | 500 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
 | TC12 | 55555 | 980 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
 | TC13 | 55555 | 1,000 | No exception (withdrawal sent) | Valid 5-digit PIN; amount payable in $20/$50 bills and within the daily limit |
-| TC14 | 55555 | 1,020 | InvalidAmountException | Amount over the $1,000 daily limit |
+| TC14 | 55555 | 1,020 | InvalidAmountException | Assumption 2: amount over the $1,000 daily limit is invalid |
 
 ### Test results
 
@@ -118,7 +118,7 @@ Faults found by reading the code but hidden by SF1 (no test fails on them yet):
 - `FormatChecker.checkPinFormat`, line 34: the digit loop also stops at 4 (`i < 4`), so fixing only the length check on line 33 would leave the fifth character unchecked. No test covers this yet, since every test PIN is all digits.
 - `CashValidator.validateWithdrawal` accepts $0. Should show up in TC08.
 - `CashValidator.validateWithdrawal` rejects the valid amount $980 (18 × $50 + 4 × $20), because it uses as many $50 bills as possible and then only tries $20 bills on the rest. Should show up in TC12.
-- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14.
+- `Session.setAmount` has no $1,000 daily-limit check. Should show up in TC14 (Assumption 2).
 
 ## Withdrawal fees: Robust Worst Case Boundary Value Analysis
 
@@ -645,18 +645,19 @@ From the CI run on the graded `dev` → `main` pull request (16 run, 16 failed, 
 
 ### Failure log
 
-Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, making the DTA table, writing the 16 tests).
+Times are rough, in minutes. All failures were found in the same test run, so "time testing before found" is the same for each: the total time spent testing up to that run (reading the spec, making the DTA table, writing the 16 tests). TF3 and TF7 were diagnosed together, in the same 5 minutes.
 
 | Failure ID | Exposing tests | Time testing before found | Time diagnosing |
 |---|---|---|---|
 | TF1 | DT1–DT4 (student, amount < $200 treated as ≥ $200: threshold is $100 in code) | 60 | 15 |
 | TF2 | DT5, DT6 (student, amount ≥ $200, fromAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
-| TF3 | DT7, DT8, DT12, DT15, DT16 (right branch, wrong rate: lines 103, 105, 121 and 133 are 10× the spec rate, line 135 is 22×) | 60 | 5 |
+| TF3 | DT7, DT8, DT12, DT15 (right branch, wrong rate: lines 103, 105, 121 and 133 are 10× the spec rate) | 60 | 5 |
 | TF4 | DT9, DT10 (non-student, amount < $100, fromAccountBalance < $4,000 treated as ≥ $4,000: threshold is $1,000 in code) | 60 | 5 |
 | TF5 | DT11 (non-student, amount < $100, fromAccountBalance ≥ $4,000, toAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
 | TF6 | DT13, DT14 (non-student, amount ≥ $100, fromAccountBalance < $2,000 treated as ≥ $2,000: threshold is $1,000 in code) | 60 | 5 |
+| TF7 | DT16 (right branch, wrong rate: line 135 is `0.055`, 22× the spec's 0.25%) | 60 | with TF3 |
 
-Faults found by reading the code but hidden by TF1, TF2 and TF4–TF6 (no test reaches these branches yet). Every rate in `calculateTransferFee` is wrong, not only the ones TF3 exposes.
+Faults found by reading the code but hidden by TF1, TF2 and TF4–TF6 (no test reaches these branches yet). Every rate in `calculateTransferFee` is wrong, not only the ones TF3 and TF7 expose.
 
 | Line | Hidden by | Code | Spec |
 |---|---|---|---|
