@@ -32,9 +32,9 @@
 
 1. The method returns the fee in dollars, calculated as rate * amount, where rate is a percent.
 
-2. Expected and actual fees are compared with tolerance '1e-6', as double arithmetic may cause rounding errors.
+2. Expected and actual fees are compared with tolerance `1e-6`, as double arithmetic may cause rounding errors.
 
-3. DTA is not concerned with validating input so no there are no tests for invalidity.
+3. DTA is not concerned with validating input so there are no tests for invalidity.
 
 4. Values around thresholds assume each value is partitioned into two cases, < its threshold or >= to its threshold. As per the spec. 
 
