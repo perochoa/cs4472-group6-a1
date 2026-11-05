@@ -1,12 +1,12 @@
 package bank.utils;
- 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
- 
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
- 
+
 /**
  * Black-box tests for FeesCalculator#calculateDepositInterest.
  * Technique: Weak Robust Equivalence Class Analysis.
@@ -14,11 +14,11 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Test IDs (D1-D16) match the tables in docs/assignment1.md.
  */
 class FeesCalculatorDepositTest {
- 
+
 	private static final double TOLERANCE = 1e-6;
- 
+
 	private final FeesCalculator calculator = new FeesCalculator();
- 
+
 	@ParameterizedTest(name = "{0}: student={1}, amount={2}, balance={3} -> fee {4} ({5})")
 	@DisplayName("Deposit fee, valid equivalence classes")
 	@CsvSource({
@@ -39,7 +39,7 @@ class FeesCalculatorDepositTest {
 		assertEquals(expectedFee, calculator.calculateDepositInterest(amount, balance, student), TOLERANCE,
 				id + " failed. " + specRule);
 	}
- 
+
 	@ParameterizedTest(name = "{0}: student={1}, amount={2}, balance={3} -> invalid ({4})")
 	@DisplayName("Deposit fee, invalid equivalence classes")
 	@CsvSource({
