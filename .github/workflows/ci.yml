@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [main, dev]
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [dev]
 
 permissions:
   contents: read
@@ -11,7 +13,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -38,8 +40,15 @@ jobs:
       - name: Determine phase from PR labels
         id: phase
         env:
+          EVENT_NAME: ${{ github.event_name }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "Push to dev: running the suite in informational mode."
+            echo "mode=informational" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           phases=$(echo "$LABELS" | jq -r '.[] | select(. == "phase:tests" or . == "phase:fix")')
           count=$(printf '%s' "$phases" | grep -c . || true)
 
@@ -76,13 +85,13 @@ jobs:
           report_paths: target/surefire-reports/TEST-*.xml
           detailed_summary: true
           include_passed: true
-          comment: true
+          comment: ${{ github.event_name == 'pull_request' }}
           updateComment: true
           fail_on_failure: false
           require_tests: false
 
       - name: Publish JaCoCo coverage
-        if: always() && hashFiles('target/site/jacoco/jacoco.xml') != ''
+        if: always() && github.event_name == 'pull_request' && hashFiles('target/site/jacoco/jacoco.xml') != ''
         continue-on-error: true
         uses: madrapps/jacoco-report@v1.8.0
         with:

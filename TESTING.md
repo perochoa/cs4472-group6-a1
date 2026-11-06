@@ -13,15 +13,17 @@ phases (below).
 ## CI
 
 `.github/workflows/ci.yml` runs on pull requests into `main` and `dev`
-(opened, synchronize, reopened, labeled, unlabeled). Pushes don't trigger
-it, so `dev` only receives changes that already passed. Both `Lint` and
-`Tests` are required checks on `main` and `dev`.
+(opened, synchronize, reopened, labeled, unlabeled) and on pushes to
+`dev`. Both `Lint` and `Tests` are required checks on `main` and `dev`.
 
 - **Lint**: `mvn -B checkstyle:check` against `checkstyle.xml` on Java 11.
-- **Tests**: requires **exactly one** of the `phase:tests` / `phase:fix`
-  labels and fails otherwise, then runs the suite in that phase's mode.
-  It publishes the JUnit results and the JaCoCo coverage report as PR
-  comments, and uploads the coverage HTML as a workflow artifact.
+- **Tests**: on a pull request, requires **exactly one** of the
+  `phase:tests` / `phase:fix` labels and fails otherwise, then runs the
+  suite in that phase's mode. On a push to `dev` (no PR, no label), runs
+  the suite with failures tolerated, informational only. It publishes the
+  JUnit results as a check (and, on pull requests, as a PR comment with
+  the JaCoCo coverage report), and uploads the coverage HTML as a
+  workflow artifact.
 
 ## The two phases
 
